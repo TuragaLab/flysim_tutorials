@@ -1,0 +1,19 @@
+[workspace]
+authors = ["Mason McGill <mason.b.mcgill@gmail.com>"]
+channels = ["conda-forge"]
+name = "flybody-tutorial"
+platforms = ["linux-64"]
+version = "0.1.0"
+
+[dependencies]
+python = "3.11.*"
+ffmpeg = ">=7.1.1,<8"
+
+[pypi-dependencies]
+numpy = ">=2.3.0, <3"
+matplotlib = ">=3.10.3, <4"
+mujoco = ">=3.3.3, <4"
+pillow = ">=11.2.1, <12"
+h5py = ">=3.14.0, <4"
+ipykernel = ">=6.29.5, <7"
+notebook = ">=7.4.3, <8"
