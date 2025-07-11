@@ -19,8 +19,8 @@ notebook cell with a preceeding "!":
 ```shell
 > apt update && \
   apt install -y ffmpeg git && \
-  pip install h5py matplotlib mujoco numpy pillow && \
-  git clone https://github.com/TuragaLab/flysim_tutorials.git /tmp/tutorial_repository && \
-  mv /tmp/tutorial_repository/body_tutorial/projectlib . && \
+  pip install h5py matplotlib mujoco numpy onnx onnxruntime pillow scipy && \
+  git clone <repository-url> /tmp/tutorial && \
+  mv /tmp/tutorial/projectlib . && \
   rm -rf /tmp/tutorial
 ```
