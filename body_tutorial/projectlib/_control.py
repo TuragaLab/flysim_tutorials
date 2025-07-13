@@ -3,6 +3,7 @@ from functools import cache
 
 import mujoco as mj
 import numpy as np
+from mujoco import MjModel, MjSpec  # type: ignore
 
 __all__ = [
     "add_actuator_filtering",
@@ -13,21 +14,21 @@ __all__ = [
 ]
 
 
-def disable_actuators(model_spec: object, pattern: str) -> None:
-    for actuator in model_spec.actuators:  # type: ignore
+def disable_actuators(model_spec: MjSpec, pattern: str) -> None:
+    for actuator in model_spec.actuators:
         if any(fnmatch(actuator.name, subpat) for subpat in pattern.split("|")):
             actuator.delete()
 
 
-def add_actuator_filtering(model_spec: object) -> None:
-    for actuator in model_spec.actuators:  # type: ignore
+def add_actuator_filtering(model_spec: MjSpec) -> None:
+    for actuator in model_spec.actuators:
         actuator.dyntype = mj.mjtDyn.mjDYN_FILTER  # type: ignore
         actuator.dynprm[0] = 0.007 if actuator.name.startswith("adhere") else 0.01
 
 
-def get_walking_actuator_indices(model: object) -> np.ndarray:
+def get_walking_actuator_indices(model: MjModel) -> np.ndarray:
     return np.concat([
-        model.actuator(segment_name).actadr  # type: ignore
+        model.actuator(segment_name).actadr
         for segment_name in _controller_output_layout()
     ])
 
@@ -44,7 +45,7 @@ def pack_controller_input(
 
 
 def to_control_range(
-    model: object,
+    model: MjModel,
     actuator_indices: np.ndarray,
     control_signals: np.ndarray,
 ) -> np.ndarray:

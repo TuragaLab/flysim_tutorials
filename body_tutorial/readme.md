@@ -2,14 +2,20 @@
 
 ## Local setup (Linux):
 
-Clone this repository, install [Pixi](https://pixi.sh/latest/installation/) if
-it isn't installed already, and then run
+1. Clone this repository.
+2. Install the [Pixi](https://pixi.sh/latest/installation/) package manager.
+3. Run `pixi install` in the `body_tutorial` directory.
+4. Point your notebook editor of choice to the Python interpreter installed in
+   `.pixi/envs/default/bin` and open `main.ipynb`.
+
+If you don't have a notebook editor installed, you can run
 
 ```shell
-> pixi shell
+> pixi run jupyter notebook main.ipynb
 ```
 
-to start a shell with the necessary dependencies installed.
+to open the tutorial in the Jupyter editor (in which case you can actually skip
+step 3, since `pixi run` will install dependencies as needed).
 
 ## Colab setup (Ubuntu 22.04 runtime, the default as of June 2025):
 
@@ -20,7 +26,7 @@ notebook cell with a preceeding "!":
 > apt update && \
   apt install -y ffmpeg git && \
   pip install h5py matplotlib mujoco numpy onnx onnxruntime pillow scipy && \
-  git clone <repository-url> /tmp/tutorial && \
-  mv /tmp/tutorial/projectlib . && \
-  rm -rf /tmp/tutorial
+  git clone https://github.com/TuragaLab/flysim_tutorials.git /tmp/tutorial_repo && \
+  mv /tmp/tutorial_repo/body_tutorial/projectlib . && \
+  rm -rf /tmp/tutorial_repo
 ```

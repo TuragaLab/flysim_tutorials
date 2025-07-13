@@ -4,12 +4,13 @@ from typing import Any, Literal, Protocol, Sequence
 
 import mujoco as mj
 import numpy as np
+from mujoco import MjData, MjModel  # type: ignore
 
 __all__ = ["SensorSuite"]
 
 
 class SensorSuite:
-    def __init__(self, model: Any) -> None:
+    def __init__(self, model: MjModel) -> None:
         self._sensors = {
             "walker/accelerometer": _WeightedSumSensor(
                 field_name="sensordata",
@@ -62,7 +63,7 @@ class SensorSuite:
             ),
         }
 
-    def update_state(self, sim_state: Any) -> None:
+    def update_state(self, sim_state: MjData) -> None:
         for sensor in self._sensors.values():
             sensor.update_state(sim_state)
 
@@ -71,7 +72,7 @@ class SensorSuite:
 
 
 class _Sensor(Protocol):
-    def update_state(self, sim_state: Any) -> None: ...
+    def update_state(self, sim_state: MjData) -> None: ...
     def read(self) -> np.ndarray: ...
 
 
@@ -81,7 +82,7 @@ class _LastValueSensor(_Sensor):
         self._indices = indices
         self._value: np.ndarray | None = None
 
-    def update_state(self, sim_state: Any) -> None:
+    def update_state(self, sim_state: MjData) -> None:
         field = getattr(sim_state, self._field_name)
         self._value = field.flat[self._indices].astype(np.float32)
 
@@ -103,7 +104,7 @@ class _WeightedSumSensor(_Sensor):
         self._snapshots = deque[np.ndarray]()
         self._snapshot_timestamps = deque[float]()
 
-    def update_state(self, sim_state: Any) -> None:
+    def update_state(self, sim_state: MjData) -> None:
         while (
             len(self._snapshot_timestamps) > 0
             and self._snapshot_timestamps[0] < sim_state.time - _averaging_interval()
@@ -131,7 +132,7 @@ class _AppendagePositionSensor(_Sensor):
         self._appendage_ids = appendage_ids
         self._value: np.ndarray | None = None
 
-    def update_state(self, sim_state: Any) -> None:
+    def update_state(self, sim_state: MjData) -> None:
         appendage_pos = sim_state.site_xpos[self._appendage_ids, :]
         root_pos = sim_state.xpos[self._root_body_id, :]
         root_mat = sim_state.xmat[self._root_body_id, :].reshape(3, 3)
@@ -142,7 +143,7 @@ class _AppendagePositionSensor(_Sensor):
         return self._value.astype(np.float32)
 
 
-def _sensor_data_indices(model: Any, pattern: str) -> np.ndarray:
+def _sensor_data_indices(model: MjModel, pattern: str) -> np.ndarray:
     sensor_names = [
         mj.mj_id2name(model, mj.mjtObj.mjOBJ_SENSOR, i)  # type: ignore
         for i in range(model.nsensor)
@@ -158,7 +159,7 @@ def _sensor_data_indices(model: Any, pattern: str) -> np.ndarray:
     ])
 
 
-def _xmat_indices(model: Any, pattern: str) -> np.ndarray:
+def _xmat_indices(model: MjModel, pattern: str) -> np.ndarray:
     body_names = [
         mj.mj_id2name(model, mj.mjtObj.mjOBJ_BODY, i)  # type: ignore
         for i in range(model.nbody)

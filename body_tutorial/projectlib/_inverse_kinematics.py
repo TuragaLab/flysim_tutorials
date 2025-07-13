@@ -4,19 +4,21 @@ https://github.com/TuragaLab/flybody/blob/e1a6135c310c39291f4fb68d682f2fd0b05e05
 """
 
 from copy import deepcopy
+from itertools import product
 from typing import Sequence
 
 import mujoco as mj
 import numpy as np
+from mujoco import MjData, MjModel, MjSpec  # type: ignore
 
-__all__ = ["PoseOptimizer"]
+__all__ = ["PoseOptimizer", "add_keypoint_sites", "add_target_position_sites"]
 
 
 class PoseOptimizer:
     def __init__(
         self,
-        model: object,
-        sim_state: object,
+        model: MjModel,
+        sim_state: MjData,
         joint_names: Sequence[str],
         site_names: Sequence[str],
         target_pos: np.ndarray,
@@ -38,20 +40,20 @@ class PoseOptimizer:
             if model.joint(jn).type == mj.mjtJoint.mjJNT_HINGE  # type: ignore
         ])
         self._site_ids = np.array(
-            [model.site(sn).id for sn in site_names],  # type: ignore
+            [model.site(sn).id for sn in site_names],
         )
-        self._target_pos = np.array(target_pos, sim_state.qpos.dtype)  # type: ignore
+        self._target_pos = np.array(target_pos, sim_state.qpos.dtype)
         self._reg_coef = reg_coef
-        self._grad_ema = np.zeros(model.nv, sim_state.qpos.dtype)  # type: ignore
+        self._grad_ema = np.zeros(model.nv, sim_state.qpos.dtype)
 
     def loss(self) -> float:
         """
         Return the value of the loss function.
         """
         hjqpi = self._hinge_joint_qpos_indices
-        site_pos = self.sim_state.site_xpos[self._site_ids]  # type: ignore
+        site_pos = self.sim_state.site_xpos[self._site_ids]
         error_loss = np.sum(np.square(site_pos - self._target_pos))
-        ext_loss = self._reg_coef * np.sum(np.square(self.sim_state.qpos[hjqpi]))  # type: ignore
+        ext_loss = self._reg_coef * np.sum(np.square(self.sim_state.qpos[hjqpi]))
         return error_loss + ext_loss
 
     def step(self, learning_rate: float, momentum_coef: float = 0.0) -> None:
@@ -59,8 +61,8 @@ class PoseOptimizer:
         Take an optimization step.
         """
         # Define shorthands.
-        mj_dtype: np.dtype = self.sim_state.qpos.dtype  # type: ignore
-        nv: int = self.model.nv  # type: ignore
+        mj_dtype: np.dtype = self.sim_state.qpos.dtype
+        nv: int = self.model.nv
         jqvi = self._joint_qvel_indices
         hjqpi = self._hinge_joint_qpos_indices
         hjqvi = self._hinge_joint_qvel_indices
@@ -73,12 +75,12 @@ class PoseOptimizer:
             mj.mj_jacSite(self.model, self.sim_state, jacobian_slice, None, site_id)  # type: ignore
 
         # Compute the gradient of the error loss.
-        site_pos = self.sim_state.site_xpos[self._site_ids]  # type: ignore
+        site_pos = self.sim_state.site_xpos[self._site_ids]
         error_loss_grad = 2.0 * ((site_pos - self._target_pos).flatten() @ jacobian)
 
         # Compute the gradient of the joint extension loss.
         ext_loss_grad = np.zeros(nv, mj_dtype)
-        ext_loss_grad[hjqvi] = 2.0 * (self._reg_coef * self.sim_state.qpos[hjqpi])  # type: ignore
+        ext_loss_grad[hjqvi] = 2.0 * (self._reg_coef * self.sim_state.qpos[hjqpi])
 
         # Update the gradient exponential moving average.
         total_loss_grad = error_loss_grad + ext_loss_grad
@@ -93,11 +95,52 @@ class PoseOptimizer:
         mj.mj_fwdPosition(self.model, self.sim_state)  # type: ignore
 
     def _get_qpos_indices(self, joint_name: str) -> np.ndarray:
-        offset: int = self.model.joint(joint_name).qposadr[0]  # type: ignore
-        size = len(self.sim_state.joint(joint_name).qpos)  # type: ignore
+        offset = self.model.joint(joint_name).qposadr[0]
+        size = len(self.sim_state.joint(joint_name).qpos)
         return np.arange(offset, offset + size)
 
     def _get_qvel_indices(self, joint_name: str) -> np.ndarray:
-        offset: int = self.model.joint(joint_name).dofadr[0]  # type: ignore
-        size = len(self.sim_state.joint(joint_name).qvel)  # type: ignore
+        offset = self.model.joint(joint_name).dofadr[0]
+        size = len(self.sim_state.joint(joint_name).qvel)
         return np.arange(offset, offset + size)
+
+
+def add_keypoint_sites(spec: MjSpec) -> None:
+    """
+    Add sites corresponding to tracked keypoints to a model.
+
+    The sites are named "site_0", "site_1", ..., "site_35". Sites 0 through 29
+    are on the legs, and sites 30 through 35 are on the body.
+    """
+    leg_names = ["T1_left", "T2_left", "T3_left", "T3_right", "T2_right", "T1_right"]
+    leg_part_names = ["coxa", "femur", "tibia", "tarsus", "claw"]
+
+    body_site_specs = [
+        ("head", "site_30", [0.0, 0.04375, 0.00875]),  # Head
+        ("abdomen_7", "site_31", [0.0, 0.039375, -0.004375]),  # Tail
+        ("thorax", "site_32", [-0.0455, 0.02625, -0.00875]),  # Left haltere
+        ("thorax", "site_33", [-0.0455, -0.02625, -0.00875]),  # Right haltere
+        ("head", "site_34", [-0.04375, 0.016625, 0.0035]),  # Left eye
+        ("head", "site_35", [0.04375, 0.016625, 0.0035]),  # Right eye
+    ]
+
+    size = (0.006, 0.006, 0.006)
+    color = (0, 1, 0, 0.8)
+
+    for i, (leg_name, part_name) in enumerate(product(leg_names, leg_part_names)):
+        body = spec.body(f"{part_name}_{leg_name}")
+        part_is_claw = part_name == "claw"
+        pos = spec.site(f"claw_{leg_name}").fromto[-3:] if part_is_claw else [0, 0, 0]
+        body.add_site(name=f"site_{i}", pos=pos, size=size, rgba=color, group=0)
+
+    for body_name, site_name, pos in body_site_specs:
+        body = spec.body(body_name)
+        body.add_site(name=site_name, pos=pos, size=size, rgba=color, group=0)
+
+
+def add_target_position_sites(spec: MjSpec, target_positions: np.ndarray) -> None:
+    """ """
+    for pos in target_positions:
+        size = (0.006, 0.006, 0.006)
+        color = (1.0, 0.0, 0.0, 0.8)
+        spec.worldbody.add_site(pos=pos, size=size, rgba=color)

@@ -1,6 +1,3 @@
-from ._inverse_kinematics import (
-    PoseOptimizer,
-)
 from ._control import (
     add_actuator_filtering,
     disable_actuators,
@@ -8,15 +5,15 @@ from ._control import (
     pack_controller_input,
     to_control_range,
 )
-from ._misc import (
-    VideoWriter,
-    add_keypoint_sites,
-    add_target_position_sites,
-    caption,
+from ._data import (
     download_body_model_if_missing,
     download_controller_if_missing,
     download_pose_dataset_if_missing,
-    render,
+)
+from ._inverse_kinematics import (
+    PoseOptimizer,
+    add_keypoint_sites,
+    add_target_position_sites,
 )
 from ._sensing import (
     SensorSuite,
@@ -25,4 +22,9 @@ from ._trajectory_encoding import (
     OrientationFn,
     PositionFn,
     encode_trajectory,
+)
+from ._visualization import (
+    VideoWriter,
+    caption,
+    render,
 )

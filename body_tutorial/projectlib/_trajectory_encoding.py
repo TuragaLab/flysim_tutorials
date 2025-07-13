@@ -56,13 +56,3 @@ def _n_samples() -> int:
 
 def _sampling_period() -> float:
     return 0.002
-
-
-@cache
-def _default_pos_samples() -> np.ndarray:
-    return np.repeat(np.array([[0.0, 0.0, 0.0]], np.float32), _n_samples(), axis=0)
-
-
-@cache
-def _default_ori_samples() -> np.ndarray:
-    return np.repeat(np.array([[1.0, 0.0, 0.0, 0.0]], np.float32), _n_samples(), axis=0)
