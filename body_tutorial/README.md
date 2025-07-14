@@ -25,7 +25,7 @@ notebook cell with a preceeding "!":
 ```shell
 > apt update && \
   apt install -y ffmpeg git && \
-  pip install h5py matplotlib mujoco numpy onnx onnxruntime pillow scipy && \
+  pip install h5py matplotlib mujoco==3.3.3 numpy onnx onnxruntime pillow scipy && \
   git clone https://github.com/TuragaLab/flysim_tutorials.git /tmp/tutorial_repo && \
   mv /tmp/tutorial_repo/body_tutorial/projectlib . && \
   rm -rf /tmp/tutorial_repo
