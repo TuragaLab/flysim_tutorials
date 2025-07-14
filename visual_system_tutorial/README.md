@@ -1,6 +1,7 @@
-# Welcome to flysim tutorials
+# Fruit fly visual system model tutorials
 
-This repository contains tutorials and ideas for working with models of the fly.
+This repository contains tutorials and ideas for working with models of the
+fruit fly visual system.
 
 Currently covering
 
@@ -31,7 +32,7 @@ flyvis download-pretrained
 ## From colab
 
 ```
-pip install git+https://github.com/TuragaLab/flysim_tutorials.git
+pip install "git+https://github.com/TuragaLab/flysim_tutorials.git#subdirectory=visual_system_tutorial"
 flyvis download-pretrained
 ```
 
