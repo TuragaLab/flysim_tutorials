@@ -1,0 +1,13 @@
+[project]
+name = "walking-controller-conversion"
+version = "0.1.0"
+authors = [{ name = "Mason McGill", email="mcgillm@hhmi.org" }]
+requires-python = "==3.10.*"
+dependencies = ["flybody[tf]", "onnx==1.16.*"]
+
+[tool.uv]
+override-dependencies = ["tensorflow-probability==0.16.0"]
+
+[tool.uv.sources.flybody]
+git = "https://github.com/TuragaLab/flybody"
+rev = "e1a6135c310c39291f4fb68d682f2fd0b05e0555"
