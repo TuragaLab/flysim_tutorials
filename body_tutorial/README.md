@@ -19,8 +19,10 @@ step 3, since `pixi run` will install dependencies as needed).
 
 ## Colab setup (Ubuntu 22.04 runtime, the default as of June 2025):
 
-Open `tutorial.ipynb` in Colab, and then run the following in the terminal, or
-in a notebook cell with a preceeding "!":
+Open `tutorial.ipynb` [in
+Colab](https://colab.research.google.com/github/TuragaLab/flysim_tutorials/blob/main/body_tutorial/tutorial.ipynb),
+and then run the following in the terminal, or in a notebook cell with a
+preceeding "!":
 
 ```shell
 > apt update && \
