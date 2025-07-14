@@ -1,6 +1,11 @@
+"""
+Definitions related to acquiring data from a Mujoco simulation to send to a
+controller.
+"""
+
 from collections import deque
 from fnmatch import fnmatch
-from typing import Any, Literal, Protocol, Sequence
+from typing import Literal, Protocol, Sequence
 
 import mujoco as mj
 import numpy as np
@@ -10,6 +15,10 @@ __all__ = ["SensorSuite"]
 
 
 class SensorSuite:
+    """
+    A collection of sensors operating simultaneously.
+    """
+
     def __init__(self, model: MjModel) -> None:
         self._sensors = {
             "walker/accelerometer": _WeightedSumSensor(
@@ -64,10 +73,20 @@ class SensorSuite:
         }
 
     def update_state(self, sim_state: MjData) -> None:
+        """
+        Allow the sensors in the suite to capture data from the simulation.
+
+        This should be called once per simulation step.
+        """
         for sensor in self._sensors.values():
             sensor.update_state(sim_state)
 
     def read(self) -> dict[str, np.ndarray]:
+        """
+        Read data from the sensors in the suite.
+
+        The returned dictionary will have an entry for each sensor.
+        """
         return {name: sensor.read() for name, sensor in self._sensors.items()}
 
 

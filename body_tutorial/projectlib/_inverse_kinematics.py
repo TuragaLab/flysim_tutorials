@@ -15,6 +15,11 @@ __all__ = ["PoseOptimizer", "add_keypoint_sites", "add_target_position_sites"]
 
 
 class PoseOptimizer:
+    """
+    An object that can be used to iteratively move joints in a Mujoco simulation
+    bring sites of interest closer to corresponding targets.
+    """
+
     def __init__(
         self,
         model: MjModel,
@@ -105,7 +110,7 @@ class PoseOptimizer:
         return np.arange(offset, offset + size)
 
 
-def add_keypoint_sites(spec: MjSpec) -> None:
+def add_keypoint_sites(model_spec: MjSpec) -> None:
     """
     Add sites corresponding to tracked keypoints to a model.
 
@@ -128,19 +133,21 @@ def add_keypoint_sites(spec: MjSpec) -> None:
     color = (0, 1, 0, 0.8)
 
     for i, (leg_name, part_name) in enumerate(product(leg_names, leg_part_names)):
-        body = spec.body(f"{part_name}_{leg_name}")
-        part_is_claw = part_name == "claw"
-        pos = spec.site(f"claw_{leg_name}").fromto[-3:] if part_is_claw else [0, 0, 0]
+        body = model_spec.body(f"{part_name}_{leg_name}")
+        is_claw = part_name == "claw"
+        pos = model_spec.site(f"claw_{leg_name}").fromto[-3:] if is_claw else [0, 0, 0]
         body.add_site(name=f"site_{i}", pos=pos, size=size, rgba=color, group=0)
 
     for body_name, site_name, pos in body_site_specs:
-        body = spec.body(body_name)
+        body = model_spec.body(body_name)
         body.add_site(name=site_name, pos=pos, size=size, rgba=color, group=0)
 
 
-def add_target_position_sites(spec: MjSpec, target_positions: np.ndarray) -> None:
-    """ """
+def add_target_position_sites(model_spec: MjSpec, target_positions: np.ndarray) -> None:
+    """
+    Add sites to a model spec to illustrate a set of target positions.
+    """
     for pos in target_positions:
         size = (0.006, 0.006, 0.006)
         color = (1.0, 0.0, 0.0, 0.8)
-        spec.worldbody.add_site(pos=pos, size=size, rgba=color)
+        model_spec.worldbody.add_site(pos=pos, size=size, rgba=color)

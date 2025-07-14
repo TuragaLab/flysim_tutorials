@@ -1,4 +1,7 @@
-from functools import cache
+"""
+Definitions related to encoding a target trajectory to send to a controller.
+"""
+
 from typing import Callable
 
 import numpy as np
@@ -14,6 +17,11 @@ PositionFn = Callable[
         np.ndarray | float,
     ],
 ]
+""" A callable object that accepts an array of time points and returns
+    corresponding target *x*, *y*, and *z* coordinate specifiers. Each specifier
+    can either be an array, if the coordinate is time-dependent, or a single
+    number, if it is not. """
+
 
 OrientationFn = Callable[
     [np.ndarray],
@@ -24,12 +32,19 @@ OrientationFn = Callable[
         np.ndarray | float,
     ],
 ]
+""" A callable object that accepts an array of time points and returns
+    corresponding target *w*, *x*, *y*, and *z* quaternion component specifiers.
+    Each specifier can either be an array, if the quaternion component is
+    time-dependent, or a single number, if it is not. """
 
 
 def encode_trajectory(
     pos_fn: PositionFn | None = None,
     ori_fn: OrientationFn | None = None,
 ) -> dict[str, np.ndarray]:
+    """
+    Return an encoding of a target trajectory to send to a controller.
+    """
     t = _sampling_period() * np.arange(_n_samples()).astype(np.float32)
     pos = np.repeat(np.array([[0.0, 0.0, 0.0]], np.float32), _n_samples(), axis=0)
     ori = np.repeat(np.array([[1.0, 0.0, 0.0, 0.0]], np.float32), _n_samples(), axis=0)

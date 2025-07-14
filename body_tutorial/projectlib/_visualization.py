@@ -1,3 +1,8 @@
+"""
+Definitions that can be used to generate images and videos from Mujoco
+simulations.
+"""
+
 from math import ceil
 from os import PathLike
 from pathlib import Path
@@ -18,6 +23,10 @@ _renderers = WeakKeyDictionary[object, mj.Renderer]()
 
 
 class VideoWriter:
+    """
+    An object that writes a single video file.
+    """
+
     def __init__(
         self,
         path: str | PathLike[str],
@@ -34,9 +43,20 @@ class VideoWriter:
         self._n_frames_written = 0
 
     def is_writing(self) -> bool:
+        """
+        Return `True` if the video writer is currently writing a video, and
+        `False` otherwise.
+        """
         return self._next_frame_time() < self.duration
 
     def send(self, timestamp: float, render_fn: Callable[[], np.ndarray]) -> None:
+        """
+        Send a (timestamp, render function) pair to the video writer.
+
+        The video writer may call the render function and store the result if it
+        needs to generate a frame. If the writer has generated its last frame,
+        it will convert the stored frames to a video file.
+        """
         if not self.is_writing():
             return
 
@@ -91,6 +111,11 @@ def render(
     height: int = 480,
     width: int = 640,
 ) -> np.ndarray:
+    """
+    Render a snapshot from a Mujoco simulation.
+
+    The result will be a `height` x `width` x 3 array.
+    """
     camera_query: int = mj.mjtObj.mjOBJ_CAMERA  # type: ignore
     camera_id: int = mj.mj_name2id(model, camera_query, camera_name)  # type: ignore
     renderer = _renderers.get(model, None)
@@ -104,6 +129,9 @@ def render(
 
 
 def caption(image: np.ndarray, text: str) -> np.ndarray:
+    """
+    Return a version of a given image with an added caption.
+    """
     pil_image = Image.fromarray(image)
     font = ImageFont.load_default(size=16)
     draw_obj = ImageDraw.Draw(pil_image)

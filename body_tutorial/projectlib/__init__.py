@@ -1,6 +1,6 @@
 from ._control import (
     add_actuator_filtering,
-    disable_actuators,
+    remove_actuators,
     get_walking_actuator_indices,
     pack_controller_input,
     to_control_range,
