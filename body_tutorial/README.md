@@ -32,3 +32,35 @@ preceeding "!":
   mv /tmp/tutorial_repo/body_tutorial/projectlib . && \
   rm -rf /tmp/tutorial_repo
 ```
+
+## Project ideas
+
+- **State space mapping:** How complicated of a behavior is six-legged walking
+  on a flat plane? One might imagine that the positions of some joints and/or
+  the measurements collected from some sensors are highly correlated. How many
+  dimensions are needed to faithfully characterize the fly's instantaneous
+  position at some point in a straight walking trajectory on a flat plane? What
+  about if the fly is moving in a winding trajectory, or walking over obstacles?
+
+- **Controller distillation:** Is it possible to make the walking controller
+  simpler and easier to understand while approximately preserving its function?
+  If you train simpler networks to mimic the controller's behavior, how does the
+  control quality fall off as the network size decreases? In addition to
+  simplifying the controller internally, it might also be possible to simplify
+  or ignore some of its inputs.
+
+- **Controller stress testing:** Mujoco allows us to simulate flies in arbitrary
+  environments. In which environments does the walking controller work well, and
+  in which environments does it fail? (_e.g._, how uneven can the terrain be
+  before the fly falls over?) You can consider other deviations from the
+  training conditions as well. For example, many animals gradually change size
+  over the course of their life, and maintain their ability to walk as they
+  grow. How robust is the walking controller to changes in the size of some or
+  all of the fly's body parts?
+
+- **Controller training:** The imitation learning procedure used to optimize the
+  walking controller takes about a week to run, so we don't suggest trying to
+  replicate it exactly. But it could still be interesting to see whether it's
+  possible to approximate it (or improve upon it) using a simpler training
+  objective. _e.g._, optimizing for some combination of walking speed, energy
+  consumption, head stability, joint stress, and/or trajectory smoothness.
