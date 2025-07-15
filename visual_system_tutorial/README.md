@@ -1,7 +1,7 @@
 # Fruit fly visual system model tutorials
 
-This repository contains tutorials and ideas for working with models of the
-fruit fly visual system.
+This directory contains tutorials and ideas for working with models of the fruit
+fly visual system.
 
 Currently covering
 
