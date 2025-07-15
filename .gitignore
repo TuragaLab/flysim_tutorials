@@ -1,0 +1,9 @@
+*.egg-info/
+.idea/
+.ipynb_checkpoints/
+.pixi/
+.venv/
+.vscode/
+__pycache__/
+_inbox/
+_outbox/
