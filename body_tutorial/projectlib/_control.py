@@ -13,7 +13,7 @@ from mujoco import MjModel, MjSpec  # type: ignore
 __all__ = [
     "add_actuator_filtering",
     "get_walking_actuator_indices",
-    "pack_controller_input",
+    "pack_controller_inputs",
     "remove_actuators",
     "to_control_range",
 ]
@@ -51,7 +51,7 @@ def get_walking_actuator_indices(model: MjModel) -> np.ndarray:
     ])
 
 
-def pack_controller_input(
+def pack_controller_inputs(
     sensor_readings: Mapping[str, np.ndarray],
     target_trajectory: Mapping[str, np.ndarray],
 ) -> np.ndarray:

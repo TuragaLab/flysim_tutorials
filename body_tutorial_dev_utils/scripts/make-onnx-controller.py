@@ -42,21 +42,19 @@ def get_onnx_controller() -> onnx.ModelProto:
 
     params = controller_params()
     n_input_chan = params["block1/weights"].shape[0]
-    n_output_chan = params["block5/mean_weights"].shape[1]
 
     input_info = [
-        oh.make_tensor_value_info("observations", FLOAT, [1, n_input_chan]),
-    ]
-    output_info = [
-        oh.make_tensor_value_info("control_signal_means", FLOAT, [1, n_output_chan]),
-        oh.make_tensor_value_info("control_signal_stds", FLOAT, [1, n_output_chan]),
+        oh.make_tensor_value_info("input", FLOAT, [None, n_input_chan]),
     ]
     nodes = [
-        *tanh_block_nodes("block1", input_name="observations"),
+        *tanh_block_nodes("block1", input_name="input"),
         *elu_block_nodes("block2", input_name="block1/output"),
         *elu_block_nodes("block3", input_name="block2/output"),
         *elu_block_nodes("block4", input_name="block3/output"),
         *dist_gen_block_nodes("block5", input_name="block4/output"),
+    ]
+    output_info = [
+        oh.make_tensor_value_info(node.output[0], FLOAT, [None, None]) for node in nodes
     ]
 
     return oh.make_model(
@@ -145,17 +143,6 @@ def elu_block_nodes(block_name: str, input_name: str) -> Iterator[onnx.NodeProto
 def dist_gen_block_nodes(block_name: str, input_name: str) -> Iterator[onnx.NodeProto]:
     bn = block_name
     yield oh.make_node(
-        name=f"{bn}/matmul",
-        op_type="MatMul",
-        inputs=[input_name, f"{bn}/mean_weights"],
-        outputs=[f"{bn}/internalvalue1"],
-    )
-    yield oh.make_node(
-        op_type="Add",
-        inputs=[f"{bn}/internalvalue1", f"{bn}/mean_biases"],
-        outputs=["control_signal_means"],
-    )
-    yield oh.make_node(
         op_type="Constant",
         inputs=[],
         outputs=[f"{bn}/scale_gain"],
@@ -166,6 +153,12 @@ def dist_gen_block_nodes(block_name: str, input_name: str) -> Iterator[onnx.Node
         inputs=[],
         outputs=[f"{bn}/min_scale"],
         value=1e-6,
+    )
+    yield oh.make_node(
+        name=f"{bn}/matmul",
+        op_type="MatMul",
+        inputs=[input_name, f"{bn}/mean_weights"],
+        outputs=[f"{bn}/internalvalue1"],
     )
     yield oh.make_node(
         op_type="MatMul",
@@ -189,6 +182,11 @@ def dist_gen_block_nodes(block_name: str, input_name: str) -> Iterator[onnx.Node
     )
     yield oh.make_node(
         op_type="Add",
+        inputs=[f"{bn}/internalvalue1", f"{bn}/mean_biases"],
+        outputs=["control_signal_means"],
+    )
+    yield oh.make_node(
+        op_type="Add",
         inputs=[f"{bn}/internalvalue5", f"{bn}/min_scale"],
         outputs=["control_signal_stds"],
     )
@@ -198,22 +196,22 @@ def test_onnx_controller(onnx_controller: onnx.ModelProto) -> None:
     env = walk_imitation()
     timestep = env.reset()
 
-    tf_observations = acme.tf.utils.add_batch_dim(
+    tf_input = acme.tf.utils.add_batch_dim(
         {k: v.astype(np.float32) for k, v in timestep.observation.items()}
     )
-    onnx_observations = np.concatenate(
-        [v.numpy().reshape(1, -1) for _, v in sorted(tf_observations.items())],
+    onnx_input = np.concatenate(
+        [v.numpy().reshape(1, -1) for _, v in sorted(tf_input.items())],
         axis=1,
     )
 
     tf_controller = get_tf_controller()
-    tf_control_dist = tf_controller(tf_observations)
+    tf_control_dist = tf_controller(tf_input)
     tf_control_means = tf_control_dist.mean()[0].numpy()
     tf_control_stds = tf_control_dist.stddev()[0].numpy()
 
     evaluator = onnx.reference.ReferenceEvaluator(onnx_controller)
     output_names = ["control_signal_means", "control_signal_stds"]
-    onnx_control_dist = evaluator.run(output_names, {"observations": onnx_observations})
+    onnx_control_dist = evaluator.run(output_names, {"input": onnx_input})
     onnx_control_means = onnx_control_dist[0][0]  # type: ignore
     onnx_control_stds = onnx_control_dist[1][0]  # type: ignore
 

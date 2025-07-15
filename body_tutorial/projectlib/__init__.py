@@ -2,7 +2,7 @@ from ._control import (
     add_actuator_filtering,
     remove_actuators,
     get_walking_actuator_indices,
-    pack_controller_input,
+    pack_controller_inputs,
     to_control_range,
 )
 from ._data import (
