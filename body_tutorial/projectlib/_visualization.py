@@ -9,7 +9,7 @@ from pathlib import Path
 from shutil import rmtree
 from subprocess import run
 from typing import Callable, Final
-from weakref import WeakKeyDictionary
+from weakref import WeakKeyDictionary, proxy
 
 import mujoco as mj
 import numpy as np
@@ -121,7 +121,7 @@ def render(
     renderer = _renderers.get(model, None)
 
     if renderer is None or renderer.height != height or renderer.width != width:
-        renderer = mj.Renderer(model, height, width)
+        renderer = mj.Renderer(proxy(model), height, width)
         _renderers[model] = renderer
 
     renderer.update_scene(sim_state, camera_id)
