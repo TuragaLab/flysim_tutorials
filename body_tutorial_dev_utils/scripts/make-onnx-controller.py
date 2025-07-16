@@ -64,7 +64,8 @@ def get_onnx_controller() -> onnx.ModelProto:
             inputs=input_info,
             outputs=output_info,
             initializer=[onh.from_array(p, n) for n, p in params.items()],
-        )
+        ),
+        opset_imports=[oh.make_opsetid("", 17)],
     )
 
 
@@ -146,13 +147,13 @@ def dist_gen_block_nodes(block_name: str, input_name: str) -> Iterator[onnx.Node
         op_type="Constant",
         inputs=[],
         outputs=[f"{bn}/scale_gain"],
-        value=float(0.7 / np.log(1.0 + np.exp(0.0))),
+        value_float=float(0.7 / np.log(1.0 + np.exp(0.0))),
     )
     yield oh.make_node(
         op_type="Constant",
         inputs=[],
         outputs=[f"{bn}/min_scale"],
-        value=1e-6,
+        value_float=1e-6,
     )
     yield oh.make_node(
         name=f"{bn}/matmul",
