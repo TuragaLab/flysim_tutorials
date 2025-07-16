@@ -17,6 +17,17 @@ If you don't have a notebook editor installed, you can run
 to open the tutorial in the Jupyter editor (in which case you can actually skip
 step 3, since `pixi run` will install dependencies as needed).
 
+## Paperspace Gradient setup (Ubuntu 22.04 runtime, the default as of July 2025):
+
+Open `tutorial.ipynb` [in
+Gradient](https://console.paperspace.com/github/TuragaLab/flysim_tutorials?clone=true)
+and then run the following in the terminal:
+
+```shell
+> pip uninstall -y tensorboard tensorflow wandb && \
+  pip install h5py matplotlib mujoco==3.3.3 numpy onnx onnxruntime pillow rich scipy
+```
+
 ## Colab setup (Ubuntu 22.04 runtime, the default as of July 2025):
 
 Open `tutorial.ipynb` [in
