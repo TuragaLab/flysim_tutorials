@@ -24,9 +24,13 @@ Gradient](https://console.paperspace.com/github/TuragaLab/flysim_tutorials?clone
 and then run the following in the terminal:
 
 ```shell
-> pip uninstall -y tensorboard tensorflow wandb && \
-  pip install h5py matplotlib mujoco==3.3.3 numpy onnx onnxruntime pillow rich scipy
+pip uninstall -y tensorboard tensorflow wandb && \
+pip install h5py matplotlib mujoco==3.3.3 numpy onnx onnxruntime pillow rich scipy
 ```
+
+_Note: It seems like Gradient notebooks don't currently support
+hardware-accelerated rendering with Mujoco, so running the tutorial code on
+Gradient will probably be somewhat slower than running it locally or on Colab._
 
 ## Colab setup (Ubuntu 22.04 runtime, the default as of July 2025):
 
@@ -36,10 +40,12 @@ and then run the following in the terminal, or in a notebook cell with a
 preceeding "!":
 
 ```shell
-> pip install h5py matplotlib mujoco==3.3.3 numpy onnx onnxruntime pillow rich scipy && \
-  git clone https://github.com/TuragaLab/flysim_tutorials.git /tmp/tutorial_repo && \
-  mv /tmp/tutorial_repo/body_tutorial/projectlib . && \
-  rm -rf /tmp/tutorial_repo
+pip install h5py matplotlib mujoco==3.3.3 numpy onnx onnxruntime pillow rich scipy && \
+git clone https://github.com/TuragaLab/flysim_tutorials.git /tmp/tutorial_repo && \
+mv /tmp/tutorial_repo/body_tutorial/projectlib . && \
+rm -rf /tmp/tutorial_repo && \
+echo '{"file_format_version": "1.0.0", "ICD": {"library_path": "libEGL_nvidia.so.0"}}' \
+     > /usr/share/glvnd/egl_vendor.d/10_nvidia.json
 ```
 
 ## Project ideas
