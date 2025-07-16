@@ -54,7 +54,7 @@ def download_controller_if_missing() -> None:
     there already.
     """
     output_path = Path("_inbox/controller.onnx")
-    file_id = "1rML98y1geZP-Qnpp2kLLKIbMH413LWaK"
+    file_id = "1ydFwmy_4wFyQ00SoZxPZUMvLRiCnCFSk"
     url = f"https://drive.usercontent.google.com/u/0/uc?id={file_id}&export=download"
 
     if not output_path.exists():

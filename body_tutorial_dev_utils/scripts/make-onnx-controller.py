@@ -101,22 +101,22 @@ def tanh_block_nodes(block_name: str, input_name: str) -> Iterator[onnx.NodeProt
         name=f"{bn}/matmul",
         op_type="MatMul",
         inputs=[input_name, f"{bn}/weights"],
-        outputs=[f"{bn}/internalvalue1"],
+        outputs=[f"{bn}/input@weights"],
     )
     yield oh.make_node(
         op_type="Add",
-        inputs=[f"{bn}/internalvalue1", f"{bn}/biases"],
-        outputs=[f"{bn}/internalvalue2"],
+        inputs=[f"{bn}/input@weights", f"{bn}/biases"],
+        outputs=[f"{bn}/input@weights+biases"],
     )
     yield oh.make_node(
         op_type="LayerNormalization",
-        inputs=[f"{bn}/internalvalue2", f"{bn}/scales", f"{bn}/offsets"],
-        outputs=[f"{bn}/internalvalue3"],
+        inputs=[f"{bn}/input@weights+biases", f"{bn}/scales", f"{bn}/offsets"],
+        outputs=[f"{bn}/normalized(input@weights+biases)"],
         epsilon=1e-5,
     )
     yield oh.make_node(
         op_type="Tanh",
-        inputs=[f"{bn}/internalvalue3"],
+        inputs=[f"{bn}/normalized(input@weights+biases)"],
         outputs=[f"{bn}/output"],
     )
 
@@ -127,16 +127,16 @@ def elu_block_nodes(block_name: str, input_name: str) -> Iterator[onnx.NodeProto
         name=f"{bn}/matmul",
         op_type="MatMul",
         inputs=[input_name, f"{bn}/weights"],
-        outputs=[f"{bn}/internalvalue1"],
+        outputs=[f"{bn}/input@weights"],
     )
     yield oh.make_node(
         op_type="Add",
-        inputs=[f"{bn}/internalvalue1", f"{bn}/biases"],
-        outputs=[f"{bn}/internalvalue2"],
+        inputs=[f"{bn}/input@weights", f"{bn}/biases"],
+        outputs=[f"{bn}/input@weights+biases"],
     )
     yield oh.make_node(
         op_type="Elu",
-        inputs=[f"{bn}/internalvalue2"],
+        inputs=[f"{bn}/input@weights+biases"],
         outputs=[f"{bn}/output"],
     )
 
@@ -159,36 +159,39 @@ def dist_gen_block_nodes(block_name: str, input_name: str) -> Iterator[onnx.Node
         name=f"{bn}/matmul",
         op_type="MatMul",
         inputs=[input_name, f"{bn}/mean_weights"],
-        outputs=[f"{bn}/internalvalue1"],
+        outputs=[f"{bn}/input@mean_weights"],
     )
     yield oh.make_node(
         op_type="MatMul",
         inputs=[input_name, f"{bn}/std_weights"],
-        outputs=[f"{bn}/internalvalue2"],
+        outputs=[f"{bn}/input@std_weights"],
     )
     yield oh.make_node(
         op_type="Add",
-        inputs=[f"{bn}/internalvalue2", f"{bn}/std_biases"],
-        outputs=[f"{bn}/internalvalue3"],
+        inputs=[f"{bn}/input@std_weights", f"{bn}/std_biases"],
+        outputs=[f"{bn}/input@std_weights+std_biases"],
     )
     yield oh.make_node(
         op_type="Softplus",
-        inputs=[f"{bn}/internalvalue3"],
-        outputs=[f"{bn}/internalvalue4"],
+        inputs=[f"{bn}/input@std_weights+std_biases"],
+        outputs=[f"{bn}/softplus(input@std_weights+std_biases)"],
     )
     yield oh.make_node(
         op_type="Mul",
-        inputs=[f"{bn}/internalvalue4", f"{bn}/scale_gain"],
-        outputs=[f"{bn}/internalvalue5"],
+        inputs=[f"{bn}/softplus(input@std_weights+std_biases)", f"{bn}/scale_gain"],
+        outputs=[f"{bn}/softplus(input@std_weights+std_biases)*scale_gain"],
     )
     yield oh.make_node(
         op_type="Add",
-        inputs=[f"{bn}/internalvalue1", f"{bn}/mean_biases"],
+        inputs=[f"{bn}/input@mean_weights", f"{bn}/mean_biases"],
         outputs=["control_signal_means"],
     )
     yield oh.make_node(
         op_type="Add",
-        inputs=[f"{bn}/internalvalue5", f"{bn}/min_scale"],
+        inputs=[
+            f"{bn}/softplus(input@std_weights+std_biases)*scale_gain",
+            f"{bn}/min_scale",
+        ],
         outputs=["control_signal_stds"],
     )
 
