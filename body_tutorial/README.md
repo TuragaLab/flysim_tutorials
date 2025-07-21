@@ -1,12 +1,12 @@
 # Fruit fly body model tutorial
 
-## Local setup (Linux):
+## Local setup (Linux/macOS/Windows):
 
 1. Clone this repository.
 2. Install the [Pixi](https://pixi.sh/latest/installation/) package manager.
 3. Run `pixi install` in the `body_tutorial` directory.
 4. Point your notebook editor of choice to the Python interpreter installed in
-   `.pixi/envs/default/bin` and open `tutorial.ipynb`.
+   the `.pixi` directory and open `tutorial.ipynb`.
 
 If you don't have a notebook editor installed, you can run
 
@@ -14,23 +14,7 @@ If you don't have a notebook editor installed, you can run
 > pixi run jupyter notebook tutorial.ipynb
 ```
 
-to open the tutorial in the Jupyter editor (in which case you can actually skip
-step 3, since `pixi run` will install dependencies as needed).
-
-## Paperspace Gradient setup (Ubuntu 22.04 runtime, the default as of July 2025):
-
-Open `tutorial.ipynb` [in
-Gradient](https://console.paperspace.com/github/TuragaLab/flysim_tutorials?clone=true)
-and then run the following in the terminal:
-
-```shell
-pip uninstall -y tensorboard tensorflow wandb && \
-pip install h5py matplotlib mujoco==3.3.3 numpy onnx onnxruntime pillow rich scipy
-```
-
-_Note: It seems like Gradient notebooks don't currently support
-hardware-accelerated rendering with Mujoco, so running the tutorial code on
-Gradient will probably be somewhat slower than running it locally or on Colab._
+to open the tutorial in the Jupyter editor.
 
 ## Colab setup (Ubuntu 22.04 runtime, the default as of July 2025):
 
@@ -47,6 +31,19 @@ rm -rf /tmp/tutorial_repo && \
 echo '{"file_format_version": "1.0.0", "ICD": {"library_path": "libEGL_nvidia.so.0"}}' \
      > /usr/share/glvnd/egl_vendor.d/10_nvidia.json
 ```
+
+## Paperspace Gradient setup (Ubuntu 22.04 runtime, the default as of July 2025):
+
+Clone this repository, and then run the following in the terminal:
+
+```shell
+pip uninstall -y tensorboard tensorflow wandb && \
+pip install h5py matplotlib mujoco==3.3.3 numpy onnx onnxruntime pillow rich scipy
+```
+
+_Note: The Gradient platform doesn't currently support hardware-accelerated
+rendering with Mujoco, so running the body tutorial code on Gradient will
+probably be somewhat slower than running it locally or on Colab._
 
 ## Project ideas
 
