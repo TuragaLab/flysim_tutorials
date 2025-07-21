@@ -1,6 +1,6 @@
 # FlyWire connectome analysis tutorial
 
-## Local setup (Linux):
+## Local setup (Linux/macOS/Windows):
 
 1. Clone this repository.
 2. Install the [Pixi](https://pixi.sh/latest/installation/) package manager.
@@ -11,7 +11,7 @@
 If you don't have a notebook editor installed, you can run
 
 ```shell
-> pixi run jupyter notebook tutorial.ipynb
+pixi run jupyter notebook tutorial.ipynb
 ```
 
 to open the tutorial in the Jupyter editor.

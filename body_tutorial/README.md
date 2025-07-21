@@ -11,7 +11,7 @@
 If you don't have a notebook editor installed, you can run
 
 ```shell
-> pixi run jupyter notebook tutorial.ipynb
+pixi run jupyter notebook tutorial.ipynb
 ```
 
 to open the tutorial in the Jupyter editor.
